@@ -7,28 +7,34 @@ spring:
   cloud:
     gateway:
       server:
-        webflux:
+        webmvc:
           routes:
-            - id: authentication
-              uri: lb://AUTHENTICATION-SERVICE:8081/
+            - id: bookshop_authentication_service
+              uri: http://localhost:8081
               predicates:
                 - Path=/authen/**
-            - id: product
-              uri: lb://PRODUCT-SERVICE:8082/
-              predicates:
-                - Path=/prod/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback
+#            - id: bookshop_product_service
+#              uri: lb://PRODUCT_SERVICE
+#              predicates:
+#                - Path=/prod/**
+#              filters:
+#                - name: CircuitBreaker
+#                  args:
+#                    id: productCircuitBreakerId
+#                    name: productCircuitBreaker
+#                    fallbackUri: forward:/fallback
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.loadbalancer: TRACE
     reactor.netty.http.client: DEBUG
-
-
 eureka:
-  instance:
-    prefer-ip-address: true
   client:
-    fetch-registry: true
-    register-with-eureka: true
     service-url:
-      defaultZone: http://localhost:8086/eureka
+      defaultZone: http://localhost:8761/eureka
