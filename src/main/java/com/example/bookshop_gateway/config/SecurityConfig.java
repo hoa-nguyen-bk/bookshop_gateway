@@ -2,6 +2,7 @@ package com.example.bookshop_gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,9 +15,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request
-                        .anyRequest().permitAll()
-                )
+                .authorizeHttpRequests(request -> {
+                    request.requestMatchers("/authen/**").permitAll();
+                    request.requestMatchers(HttpMethod.POST,"/products/**").hasRole("ADMIN");
+                    request.anyRequest().permitAll();
+                })
                 .build();
 
     }
